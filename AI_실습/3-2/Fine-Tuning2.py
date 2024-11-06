@@ -1,3 +1,5 @@
+# 이 실습은 코드 에러가 자꾸 나서 일단 패스
+
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from datasets import load_dataset
 import torch
