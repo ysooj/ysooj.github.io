@@ -1,0 +1,4 @@
+transformers의 최신 버전(4.38 이후)에서는 lang_code_to_id를 제공하지 않기 때문에
+pip install transformers==4.37.0 해주셔야 합니다
+
+음성파일 생성이랑 재생 부분도 output_audio_path랑 audio_path도 수정해야 합니다
