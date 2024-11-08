@@ -1,0 +1,100 @@
+reproduce : 코드를 복사해서 똑같이 실행해보는 것.
+
+sys.stdin 시스템 스탠다드 입력은 주피터 노트북에서는 오류가 날 것이다.
+따라서 input으로 해야 한다.
+시스템 스탠다드 입력은 터미널 상에서 입력을 받는 것을 전제로 만들어졌기 때문이다.
+
+코딩 테스트에서 더 빠르게 입력을 받고자 하거나, 터미널 창에서는 시스템 스탠다드 입력을 사용하면 되고,
+주피터 노트북과 같은 환경에서는(VS Code와 같은 IDE에서도 오류가 날 수 있다고 한다.) input으로 입력을 받아야 한다.
+
+시스템 스탠다드 입력의 예시는 아래와 같다.
+import sys
+number1, number2 = map(int, sys.stdin.readline().strip().split())
+
+print(f'number1 + number2 = {number1 + number2}')
+print(f'number1 - number2 = {number1 - number2}')
+print(f'number1 * number2 = {number1 * number2}')
+print(f'number1 / number2 = {number1 / number2}')
+
+# 출력 ; 주피터 노트북에서는 이런 에러가 나는 것이다.
+ValueError: not enough values to unpack (expected 2, got 0)
+
+
+
+_는 현재는 값을 받아오지만, 이후에는 까먹으라는 의미다.
+즉, 현재는 쓰이지만, 뒤에서는 쓰이지 않기 때문에, 이를 따로 변수 이름을 지정함으로써 메모리를 낭비할 필요는 없다는 것이다.
+_는 no name 변수, 한 번 변수로 쓰이지만, 메모리를 차지하는 변수는 아니다.
+앞으로 _(언더바) 변수를 쓸 일이 많을 것이라고 한다.
+반복문에서 쓰인 예시는 아래와 같다.
+for _ in range(5) :
+    print('hi')
+굳이 i 라고 쓰지 않고 _ 라고 씀으로써, 불필요하게 메모리를 낭비하는 일을 줄일 수 있는 것이다.
+예를 들어
+for i in range(5) :
+    print('hi')
+라고 한다면, 반복문이 돌 때마다 i에 대해서 메모리 할당이 일어난다.
+for문을 돌때마다 변수 i의 값을 갱신한다.
+_는 따로 변수 할당/갱싱없이 반복문이 실행된다. 이를 통해 메모리와 컴퓨팅 자원를 아낄 수 있다!
+
+
+
+
+변수 이름
+chr : 캐릭터. 문자 하나를 지징하는 변수 이름으로 쓰인다. c로도 쓰인다.
+
+.swapcase() : 대소문자를 바꿔주는 함수
+
+
+
+
+탈출 문자 : \
+\n : 엔터. 줄바꿈
+- 예시
+print('안녕하세요\n안녕하세요')
+- 결과
+안녕하세요
+안녕하세요
+
+
+
+
+r formating
+r"안에 내용 어떤 것이든"
+r formating을 통해서 ""로 감싸진 안의 내용은 그대로 출력하게 되는 것이다.
+- 예시
+print(r"/'@3$@#%^")
+- 출력
+/'@3$@#%^
+
+
+
+
+map() 함수
+첫 번째에는, 뒤에 있는 모든 요소들에 일괄적으로 적용할 함수를 지정해준다.
+- 예시
+map(int, input().strip().split(' '))
+이는 입력된 값이 개행문자를 날리고, 공백을 기준으로 구분된 값으로, int가 적용되게 된다.
+
+
+
+나머지 연산자
+실무에서 많이 사용되는 경우 : 끝의 2자리 수만 원할 때
+- 예시
+num = 8456194635212214345
+num = num % 100
+print(num)
+- 결과
+45
+- 요일 예시
+days_in_week = 7
+current_day = 3 # 수요일은 3이라고 가칭
+days_later = 10
+
+print((current_day + days_later)%days_in_week)
+- 결과 ; 10일 뒤의 요일을 알 수 있다.
+6
+
+- 360도가 최대이므로.
+rotation = 370 # 게임에서 370도 회전
+aime_rotation = rotation % 360
+print(aime_rotation)
