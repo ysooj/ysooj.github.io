@@ -1,0 +1,186 @@
+#### **YOLO ( You Only Look Once )**
+
+YOLO에 대해 알아볼 것이다. 실시간 객체 탐지 알고리즘 중 하나로, 한 번의 신경망 실행으로 이미지 내의 다양한 객체를 예측하는 방식으로 동작한다. YOLO는 빠르고 효율적이다. 동영상에 대해서 실시간 객체 탐지를 할 수도 있고, 카메라로부터 받은 입력에 대해서 실제로 객체 탐지를 진행할 수도 있을 것이다.
+
+#### **ChatGPT로 그림 만들기**
+
+ChatGPT는 이미지도 만들 수 있다. model에 dall-e라는 걸 설정해주고, prompt를 prompt 파라미터에 전달하면 된다. 아래쪽은 이미지의 size와 quality, 개수(n)를 설정하는 부분이다.
+
+```
+from openai import OpenAI
+client = OpenAI()
+
+prompt = input("Prompt: ")
+
+response = client.images.generate(
+    model = "dall-e-3"
+    prompt = prompt
+    size = "1024x1024"
+    quality = "hd"
+    n = 1
+)
+
+image_url = response.data[0].url
+print(image_url)
+```
+
+결과를 실행시켜보면 URL을 제공해준다. 이 URL에 접근하면, 우리가 결과 이미지를 확인할 수 있다.
+
+이미지 생성은 Stable Diffusion이랑 DALL-E 등 다양한 모델들이 제공되기 때문에, 골라서 사용하면 된다. Stable Diffusion은 사전 학습된 모델로 가져오니까, 굉장히 오래 걸렸었다. DALL-E는 서버에서 돌아간 다음 결과만 사용자에게 전달되기 때문에, Stable Diffusion보다 훨씬 동작하는 속도가 빠른 것이다.
+
+#### **YOLO 실습**
+
+YOLO는 이미지에 대한 객체 탐지를 하는 모델인데, 특징이 몇 개 있다. 한번에 여러 개의 객체를 동시에 예측한다. 따라서 동작 속도가 굉장히 빠르고 성능적도 훌륭하다. 버전도 굉장히 다양하고, 세부적으로도 미니 버전이나 정확한 버전 등 세분화가 돼있다. 그래서 자신의 환경에 따라 다양한 모델의 성능을 측정한 다음, 적당한 모델을 골라서 사용하면 된다. 코드도 굉장히 간단하다. 그러나 주의점이 있다면 상용 프로그램에 허가가 되는 모델과, 그렇지 않은 모델이 있어서, 주의해서 사용해야 한다는 것이다.
+
+YOLO를 사용하기 위해서는 ultralytics라는 패키지를 설치해줘야 한다.
+
+```
+pip install ultralytics
+```
+
+이제 코드를 작성해보겠다.
+
+```
+from ultralytics import YOLO
+import cv2
+from matplotlib import pyplot as plt
+```
+
+먼저 ultralytics 패키지에서 YOLO라는 모델을 가져오고 있다.
+
+cv2라는 패키지도 가져오고 있는데, 이미지나 다양한 시각 처리에 굉장히 유용한 툴이다.
+
+그 후에는 시각화를 위한 matplotlib을 가져왔다.
+
+```
+# YOLOv8 모델 로드 (YOLOv8s)
+model = YOLO('yolov8n.pt')  #
+```
+
+model을 로드했다.
+
+```
+# 이미지 파일 경로
+image_path = 'cat.jpeg'
+
+# 이미지를 모델에 입력하여 객체 탐지 수행
+results = model(image_path)
+
+# 탐지 결과 출력
+result = results[0]
+```
+
+이미지 경로(image\_path)를 지정하고, 이미지를 모델에 전달(model(image\_path))하면, 바로 결과(result)가 나오게 된다. 그러나, 여기까지만 코드를 실행하고 result를 확인해보면, 사람이 해독하기 굉장히 힘들다.
+
+결과를 시각화해보자. 이제 result 대신에 객체의 위치를 이미지에 투영한 형태로 결과를 볼 것이다.
+
+```
+# 탐지된 객체들이 표시된 이미지를 가져옴
+img_with_boxes = result.plot()  # result.plot()은 바운딩 박스가 포함된 이미지를 반환
+
+# Matplotlib을 사용하여 이미지 출력
+plt.imshow(cv2.cvtColor(img_with_boxes, cv2.COLOR_BGR2RGB))
+plt.axis('off')
+plt.show()
+```
+
+결과를 실행하면 아래와 같이 나온다.
+
+[##_Image|kage@b2aEiX/btsKCwT1qdh/i7sBKhFa6CJE4VO6uZcvmK/img.png|CDM|1.3|{"originWidth":965,"originHeight":819,"style":"alignLeft"}_##]
+
+cat일 확률이 0.89로 나왔다. 별다른 GPU나 연산 장비가 있는 장치를 사용하지 않았음에도, 이미지 하나에서 다양한 객체를 탐지하는 데 오랜 시간이 걸리지 않았다.
+
+---
+
+#### **FastAI**
+
+FastAI는 높은 레벨로 인공지능을 추상화시켜서 그 기능을 제공해주는 라이브러리다. 이 라이브러리에는 사전 학습된 모델도 존재하고, 단순히 구조만 제공해주는 경우도 있다. 높은 레벨로 인공지능을 추상화한다는 것은 사용하기가 상당히 쉽다는 뜻이라서, 우리도 유용하게 활용할 수 있을 것이라고 한다.
+
+**레즈넷(ResNet)** 이라고 하는 유명한 비전 모델의 사전 학습 모델을 사용하는 방법에 대해 학습해볼 것이다. 대규모 데이터셋을 미리 학습된 가중치를 이용해서, 모델을 더 빠르고 효율적으로 학습시킬 수 있기 때문에, 우리가 좋은 성능의 모델을 편하게 사용할 수 있다는 장점이 있다.
+
+코드를 살펴보자. 먼저 FastAI 라이브러리를 설치해주자.
+
+```
+pip install fastai
+```
+
+그 후에 라이브러리를 import해야하는데, FastAI는 제공하는 인공지능이 상당히 많다. 우리는 이번 장에서는 비전을 사용할 거기 때문에, vision 라이브러리의 모든 모듈을 가져와준다.
+
+```
+from fastai.vision.all import *
+```
+
+```
+# 데이터셋 로드
+path = untar_data(URLs.PETS)  # PETS 데이터셋 다운로드 및 압축 해제
+path_imgs = path/'images'
+
+# 이미지 파일 라벨링 함수 정의
+def is_cat(x): return x[0].isupper()
+
+# 데이터블록 정의
+dls = ImageDataLoaders.from_name_func(
+    path_imgs, get_image_files(path_imgs), valid_pct=0.2, seed=42,
+    label_func=is_cat, item_tfms=Resize(224))
+
+# 데이터셋 확인
+dls.show_batch(max_n=9, figsize=(7, 6))
+```
+
+먼저, 데이터셋을 로드하는 부분이다. URLs.PETS는 FastAI가 제공하는 url로, 고양이와 강아지 이미지를 포함한다.
+
+그 후에, 이런 데이터셋에 대해서 라벨링 함수를 정의해야 하는데, 이 함수는 파일 이름이 대문자로 시작하면 고양이, 소문자로 시작하면 강아지로 분류하는 규칙을 적용하고 있는 것이다. 데이터셋의 규칙이 그러하다.
+
+그리고 데이터 블록을 생성하게 되는데, 이미지 파일 이름에 기반해서 라벨링을 수행하면서, 데이터를 불러온다. 여기에서는 데이터를 훈련과 검증 데이터셋으로 나눌 때, 데이터셋의 비율을 어떻게 할 지, 그리고 이미지를 모델에 어떻게 맞춰줄 지에 대해 설정하게 된다. 그 후에는 데이터셋을 확인하면서 종료되게 된다.
+
+이제 사전 학습된 ResNet 모델을 로드해보자.
+
+```
+# ResNet34 사전 학습된 모델을 사용해 학습기 생성
+learn = cnn_learner(dls, resnet34, metrics=error_rate)
+
+# 학습률 찾기 (최적의 학습률을 자동으로 찾아줌)
+learn.lr_find()
+
+# 모델 학습 (사전 학습된 모델에 대해 파인 튜닝)
+learn.fine_tune(3)
+```
+
+FastAI는 최적의 학습률, Fine-tuning 등의 작업도 높은 레벨로 제공되기 때문에 편하게 사용할 수 있다. 여기서 learning rate find(lr\_find)와 Fine-tuning이라는 함수(fine-tune(3))를 통해서 한번에 진행할 수 있게 된다.
+
+더보기
+
+learn.fine\_tune(3) 코드는 사전 학습된 ResNet34 모델을 3번의 에포크 동안 파인 튜닝하는 코드다. 이는 일반적으로 적합하지만, 데이터셋 크기나 모델에 따라 학습을 더 잘 진행하거나 학습 속도를 조절할 수 있다.
+
+모델의 평가도 굉장히 간단하게 수행할 수 있는데, learn.show\_results 해주면 검증 데이터셋에 대한 예측 결과를 시각적으로 보여준다.
+
+```
+# 모델 평가
+learn.show_results()
+
+# 혼동 행렬 (Confusion Matrix) 출력
+interp = ClassificationInterpretation.from_learner(learn)
+interp.plot_confusion_matrix()
+```
+
+예측한 레이블과 실제 레이블을 함께 보여줘서, 모델의 정확도를 좀 더 쉽게 보여주는 장점이 있다.
+
+이렇게 학습을 했으니, 새로운 이미지, 즉 우리가 원하는 데이터에 대해서 예측을 진행해보자.
+
+```
+# 새로운 이미지에 대한 예측
+img = PILImage.create('path_to_your_image.jpg')
+pred, _, probs = learn.predict(img)
+
+# 결과 출력
+print(f"Prediction: {pred}, Probability: {probs.max():.4f}")
+img.show()
+```
+
+첫 번째로, 이미지를 로드해야 한다. 로드한 이미지에 대해서 learn.predict를 전달하면, 거기에 대해서 Prediction과 Probability가 나오게 된다. 모델이 예측한 레이블과 모델이 예측한 레이블의 확률이 반환됨으로써, 우리가 그 결과를 좀 더 세부적으로 볼 수 있게 도와주는 것이다. 레이블 자체도 명확하게 주기 때문에 사용이 조금 더 편안하다는 장점이 있다.
+
+결과를 출력해보자. 이미지 파일 라벨링 함수 정의에 is\_cat이라고 돼있기 때문에, True라고 나오면 고양이고, False면 강아지다.
+
+[##_Image|kage@bEzaKO/btsKD5VNedY/GUKP3jrSGBDwqDRy34etX0/img.png|CDM|1.3|{"originWidth":862,"originHeight":733,"style":"alignLeft","width":600,"height":510}_##]
+
+어제 사용했던 것과 같은 고양이 사진을 예측할 이미지로 로드했다. 결과는 100% True, 즉 고양이로 나왔다.
