@@ -1,0 +1,17 @@
+AI_1/
+.env
+파이썬에서 .env파일로 API 키 불러오기.md
+파이썬에서 가상환경 활성화하는 방법.txt
+# 만약 이미 Git에 추적되고 있는 파일이라면, .gitignore를 추가한 후에도 여전히 추적된다.
+# 이미 Git에 추가된 파일을 무시하려면 git rm --cached 명령어를 사용해야 한다.
+# 예를 들어, example.txt 파일을 이미 Git에서 추적 중이라면 아래의 코드를 터미널에 입력해야 한다.
+# git rm --cached example.txt
+# 이 명령어는 파일을 Git의 인덱스에서 제거하지만, 실제 파일 시스템에서는 삭제하지 않는다.
+# 그런 다음 변경 사항을 커밋해야 한다. 즉 .gitignore 파일과 Git에서 추적 중인 파일을 무시하는 변경 사항을 커밋해야 한다.
+# git add .gitignore
+# git commit -m "Add .txt files to .gitignore"
+img/
+yolov8x.pt
+folder_name/
+yolov8n.pt
+__pycache__
