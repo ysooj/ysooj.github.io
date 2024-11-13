@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT 대화 서비스</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ChatGPT 대화 서비스</h1>
+
+        <!-- 사용자 입력 폼 -->
+        <form action="/chat" method="post">
+            <label for="user_input">메시지를 입력하세요:</label><br>
+            <textarea id="user_input" name="user_input" rows="4" cols="50"></textarea><br><br>
+            <button type="submit">전송</button>
+        </form>
+
+        <!-- 대화 내역 -->
+        <div class="conversation">
+            {% if conversation_history %}
+            <h2>대화 내역</h2>
+            {% for message in conversation_history %}
+            <div class="message {{ message.role }}">
+                <p><strong>{{ message.role.capitalize() }}:</strong> {{ message.content }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
