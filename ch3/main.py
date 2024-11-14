@@ -26,6 +26,10 @@ from langchain_openai import OpenAIEmbeddings   # langchain_openai 라이브러�
 import faiss    # 벡터 검색을 위한 라이브러리
 from langchain_community.vectorstores import FAISS  # # langchain_community에서 FAISS 벡터스토어 클래스를 임포트한다.
 
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+# LangChain의 ChatPromptTemplate와 RunnablePassthrough 클래스를 임포트한다.
+
 # .env 파일 로드
 load_dotenv()   # .env 파일을 로드하여 환경 변수들을 설정한다.
 
@@ -97,10 +101,23 @@ embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
 # 자연어 처리(NLP) 작업에서 텍스트를 벡터 공간으로 변환하여, 유사도 검색, 클러스터링, 분류 등 다양한 작업에 활용된다.
 
 # 벡터 스토어 생성
+vectorstore = FAISS.from_documents(documents=splits_RCT, embedding=embeddings)
 
+# FAISS를 Retriever로 변환
+retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 1})
 
+# 프롬프트 템플릿 정의
+contextual_prompt = ChatPromptTemplate.from_messages([
+    # 시스템 메시지: 모델에게 주어진 문맥 내에서만 질문에 답하라는 지시를 추가
+    ("system", "Answer the question using only the following context."),
+    
+    # 사용자 메시지: 실제 문맥과 질문이 채워질 수 있도록 변수를 포함한 프롬프트 템플릿 생성
+    # {context}와 {question}은 나중에 동적으로 입력값에 따라 채워짐
+    ("user", "Context: {context}\\n\\nQuestion: {question}")
+])
 
-
+# 이 템플릿은 이후 사용자가 'context'와 'question'을 제공했을 때, 
+# "Context: <문맥 내용>\\n\\nQuestion: <질문 내용>" 형태로 메시지를 만들어냄
 
 
 # FAISS 말고 Chroma
