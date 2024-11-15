@@ -29,6 +29,7 @@ from langchain_community.vectorstores import FAISS  # # langchain_community에�
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 # LangChain의 ChatPromptTemplate와 RunnablePassthrough 클래스를 임포트한다.
+# 즉, langchain_core에서 필요한 모듈을 불러온다.
 
 # .env 파일 로드
 load_dotenv()   # .env 파일을 로드하여 환경 변수들을 설정한다.
@@ -111,13 +112,60 @@ contextual_prompt = ChatPromptTemplate.from_messages([
     # 시스템 메시지: 모델에게 주어진 문맥 내에서만 질문에 답하라는 지시를 추가
     ("system", "Answer the question using only the following context."),
     
-    # 사용자 메시지: 실제 문맥과 질문이 채워질 수 있도록 변수를 포함한 프롬프트 템플릿 생성
-    # {context}와 {question}은 나중에 동적으로 입력값에 따라 채워짐
+    # 사용자 메시지: 실제 문맥({context})과 질문({question})이 채워질 수 있도록 변수를 포함한 프롬프트 템플릿 생성
+    # {context}와 {question}은 실제 사용자가 제공한 값으로 대체된다.
     ("user", "Context: {context}\\n\\nQuestion: {question}")
 ])
 
-# 이 템플릿은 이후 사용자가 'context'와 'question'을 제공했을 때, 
-# "Context: <문맥 내용>\\n\\nQuestion: <질문 내용>" 형태로 메시지를 만들어냄
+# RAG 체인 구성
+# 프롬프트 템플릿은 위에서 정의했다.
+
+# 'RunnablePassthrough' 클래스를 상속받은 DebugPassThrough 클래스 정의
+# 이 클래스는 입력된 데이터를 그대로 전달하면서, 중간 결과를 디버깅 용도로 출력한다.
+class DebugPassThrough(RunnablePassthrough):
+    def invoke(self, *args, **kwargs):
+        # 부모 클래스의 invoke 메서드를 호출하여 처리된 결과를 받아온다.
+        output = super().invoke(*args, **kwargs)
+        # 처리된 결과를 출력하여 디버깅 용도로 확인한다.
+        print("Debug Output:", output)
+        # 처리된 결과를 그대로 반환한다.
+        return output
+
+# 문서 리스트를 텍스트로 변환하는 ContextToText 클래스 정의
+# 'RunnablePassthrough'를 상속받아, context의 각 문서를 텍스트로 결합하는 기능을 수행한다.
+class ContextToText(RunnablePassthrough):
+    def invoke(self, inputs, config=None, **kwargs):  # config 인수도 받을 수 있도록 설정
+        # context의 각 문서를 텍스트로 결합한다.
+        context_text = "\n".join([doc.page_content for doc in inputs["context"]])
+        # 결합된 텍스트와 사용자 질문을 함께 반환한다.
+        return {"context": context_text, "question": inputs["question"]}
+
+# RAG 체인에서 각 단계에 DebugPassThrough 추가
+# retriever는 'context'를 가져오는 역할을 하고, DebugPassThrough는 사용자 질문이 잘 전달되는지 확인한다.
+# 이후 ContextToText가 문서 리스트를 텍스트로 변환하고, 마지막으로 프롬프트 템플릿을 사용하여 모델을 호출한다.
+rag_chain_debug = {
+    "context": retriever,                  # retriever는 context를 가져오는 단계다.
+    "question": DebugPassThrough()         # DebugPassThrough는 question을 그대로 전달하며 디버깅을 출력한다.
+} | DebugPassThrough() | ContextToText() | contextual_prompt | model  # 각 단계에 디버깅과 텍스트 변환을 추가한 파이프라인
+
+# 챗봇 구동 확인
+# 무한 루프를 시작. 이 루프는 사용자가 질문을 입력할 때마다 계속 반복된다.
+while True:  
+    # 사용자에게 질문을 입력하라는 메시지를 출력
+    print("========================")
+    
+    # 사용자로부터 질문을 입력받음
+    query = input("질문을 입력하세요: ")
+    
+    # 'rag_chain_debug' 체인을 호출하여 질문을 처리하고 응답을 받음
+    # 이 때, 'query'는 사용자가 입력한 질문이다.
+    response = rag_chain_debug.invoke(query)  
+    
+    # 'Final Response:'라는 메시지를 출력하여 최종 응답을 나타냄
+    print("Final Response:")
+    
+    # 'response.content'는 모델이 반환한 응답의 내용을 출력한다.
+    print(response.content)
 
 
 # FAISS 말고 Chroma
