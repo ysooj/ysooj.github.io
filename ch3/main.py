@@ -155,7 +155,12 @@ while True:
     print("========================")
     
     # 사용자로부터 질문을 입력받음
-    query = input("질문을 입력하세요: ")
+    query = input("질문을 입력하세요 (종료하려면 'exit'를 입력하세요): ")
+
+    # 'exit'를 입력하면 프로그램을 종료시킴
+    if query.lower() == 'exit':
+        print("프로그램을 종료합니다.")
+        break
     
     # 'rag_chain_debug' 체인을 호출하여 질문을 처리하고 응답을 받음
     # 이 때, 'query'는 사용자가 입력한 질문이다.
